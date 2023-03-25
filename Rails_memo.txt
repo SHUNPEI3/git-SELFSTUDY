@@ -1,0 +1,347 @@
+DWC  ONLINE メモ
+
+
+画像投稿実装　☆☆☆
+
+① ActiveStorageをインストール
+　・$ rails active_storage:install → $ rails db:migrate　を実行
+
+② 画像投稿するモデルに以下を追加
+　・has_one_attached :image
+
+③ 画像のサイズ変更を行うGemを導入
+　・gemファイルのimage_processingのコメントアウトを外す
+　　　# gem 'image_processing', '~>1.2’　→　gem 'image_processing', '~>1.2'
+    ・bundle installを実行する
+
+④ config/environments/development.rbに以下を追加
+　・ config.active_job.queue_adapter = :inline
+
+⑤ メソッドを設定
+　・画像投稿するモデルに画像投稿メソッドを追加する＋引数に設定した値に画像のサイズを変換できるようにも
+
+　　def get_image(width, height)
+ 　　 unless image.attached?
+    　　file_path = Rails.root.join('app/assets/images/○○○.jpg')
+    　　profile_image.attach(io: File.open(file_path), filename: 'default-image.jpg', content_type: 'image/jpeg')
+  　　end
+  　　profile_image.variant(resize_to_limit: [width, height]).processed
+　　end
+
+
+
+device機能実装時の各種設定　☆☆☆
+
+　● 初期状態のdevise から、名前（name）を保存できるように修正
+　　⑴ migration ファイルの修正
+　　　　名前（name）を保存するカラムがないため、カラムの追加をする
+　　⑵ Viewファイルの実装&修正
+　　　 　rails g devise:viewsでView ファイルを作成 → ユーザ登録の際に ”name” を登録するためのフォーム(form_with)を追加
+　　⑶ usersコントローラーファイルの作成&編集
+　　　 　指定したデータ（name）を保存できるよう、ApplicationControllerに以下を記載する
+　　　　　例）  before_action :configure_permitted_parameters, if: :devise_controller?
+　　　　　　　  protected
+　　　　　  　　def configure_permitted_parameters
+　　　　　　　　devise_parameter_sanitizer.permit(:sign_up, keys: [:name])　←   (:deviseの処理名, keys: [:許可するキー])
+  　　　　　　　end
+
+　● ログイン時に名前（name）を入力してログインできるように修正
+　　・deviseの設定ファイルであるconfig/initializers/devise.rbファイルの以下を修正
+　　　　⑴ # config.authentication_keys = [:email] のコメントアウトを外す
+　　　　⑵ config.authentication_keys = [:name] に修正
+
+　● サインイン後、ログアウト後の遷移先を指定
+　　・ApplicationControllerに以下を記載する
+　　      例）def after_sign_in_path_for(resource)  または  after_sign_out_path_for(resource)
+    　　   　 　○○○○○_path
+  　　　    　end
+
+　● サインアップ(新規登録後)のページ遷移先設定方法
+　　※参考サイト：https://qiita.com/akkyta/items/ea7ffdb8159a797632a4
+
+　● 権限の設定をする ＝ ログイン認証が成功していないと、特定以外の画面（ログインと新規登録は除く）は表示できない仕様にする
+　　・ApplicationControllerに以下を記載する
+           　例）  before_action :authenticate_user!, except: [:○○○]
+　　　※exceptは指定したアクションをbefore_actionの対象から外すことができる。
+
+　● ログイン済み他ユーザーからのアクセスを制限
+　　　before_action:  メソッド名を設定する
+￼
+
+　● 管理者(Admin)アカウントの実装方法
+　　※参考サイト：https://onl.sc/SG3E8zy
+
+　● 管理者(Admin)ログイン/ログアウト後のページ遷移先設定
+　　※参考サイト：https://qiita.com/nao0725/items/93f5400c48c957c50de7
+
+
+
+Bootstrapの導入方法　☆☆☆
+
+　① yarn add jquery bootstrap@4.5 popper.js　を実行　← jqueryと bootstrap@4.5と popper.jsの計３ファイルをダウンロード？
+
+　② config/webpack/environment.jsを編集　← jQueryを使用するための設定
+
+　　　const webpack = require('webpack')
+　　　environment.plugins.prepend(
+　　　  'Provide',
+　　　  new webpack.ProvidePlugin({
+　　　    $: 'jquery/src/jquery',
+　　　    jQuery: 'jquery/src/jquery',
+　　　    Popper: 'popper.js'
+　　　  })
+　　　)
+
+　③ app/javascriptの配下にstylesheetsフォルダを作成、stylesheetsフォルダの配下にapplication.scssファイルを作成して、以下を記載する
+
+　　　@import '~bootstrap/scss/bootstrap';
+
+　④ app/javascript/packs/application.jsに下記を追記
+
+　　　import "jquery";　　　　← jQueryを使用するための設定
+　　　import "popper.js";　　　← popper.jsを使用するための設定
+　　　import "bootstrap";　　　← bootstrapを使用するための設定
+　　　import "../stylesheets/application"
+
+　⑤ app/views/layouts/application.html.erbを修正
+
+　　【変更前】
+　　　<%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+　　【変更後】
+　　　<%= stylesheet_pack_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+
+
+
+いいね機能実装　☆☆
+
+〈ポイント〉メソッドの設定
+　・いいねしているかの判定メソッドをBookモデル（親モデル）に記載
+　　　例）def favorited_by?(user)
+    　　　　  favorites.exists?(user_id: user.id)
+　　　　　end
+
+〈ポイント〉routesの設定
+　・bookにネストさせる
+　・resources ではなくresourceを使用
+
+〈ポイント〉favoritesコントローラーファイルにアクションを定義
+　・destroyアクションはuser_idとbook_idの２つを削除する必要あり
+　　　例）book = Book.find(params[:book_id])
+    　　　　favorite = current_user.favorites.find_by(book_id: book.id)
+　　　　　favorite.destroy
+
+
+
+コメント機能実装　☆☆
+
+〈ポイント〉Viewファイルの編集
+       ■コメントをcreateする場合： form_withに対して、配列でインスタンス変数を2つ指定する
+　　　例）<%= form_with model: [@book, @book_comment] do |f| %>
+
+       ■コメントをdeleteする場合： link_toに対して、パスを2つ指定する
+　　　例）<%= link_to "削除", book_book_comment_path(book_comment.book.id, book_comment.id), method: :delete %>
+
+〈ポイント〉book_commentコントローラーファイルにアクションを定義
+　・destroyアクションは主キーのみ削除させる
+　　　例）BookComment.find(params[:id]).destroy
+
+
+
+フォロー・フォロワー機能実装　☆☆
+　※参考URL：https://qiita.com/kazukimatsumoto/items/14bdff681ec5ddac26d1
+
+　① Relationshipモデル（中間テーブル）を作成
+
+　　〈ポイント〉カラムは”follower_id”と”followed_id”
+
+《イメージ図》
+￼
+
+　② アソシエーションを設定
+　　⑴ Relationshipモデル（中間テーブル）には以下を記載
+
+ 　　   belongs_to :following, class_name: "User"　←   フォローする側
+ 　　   belongs_to :follower, class_name: "User"　  ←   フォローされる側
+
+　〈ポイント〉belongs_to: ○○○ には、参照先したい擬似テーブル名を記載
+　　　メモ：本当はbelongs_to: userとしたいのだが、フォローする側とフォローされる側のどちらともUserのため、名前の重複が起きてしまい記述できない
+　　　　　　そのため、架空のテーブル名を設定しなければならない
+　〈ポイント〉class_name:”モデル名（実在するモデル）”と記載することで、実在するモデル内のテーブルからデータを取得できる
+
+　　　例）belongs_to 変更したい親モデル名, class_name: "元々の親モデル名"
+
+　　⑵ Userモデルには以下を記載
+
+　　　has_many :active_relationships, class_name: "Relationship”, foreign_key: :following_id       ←   フォローする側
+　　　has_many :passive_relationships, class_name: "Relationship”, foreign_key: :follower_id   　←   フォローされる側
+
+　〈ポイント〉has_many: ○○○ には、参照先したい擬似テーブル名を記載
+　　　メモ：本当はhas_many: relationshipとしたいのだが、フォローする側とフォローされる側のどちらともRelationshipのため、名前の重複が起きてしまい記述できない
+　　　　　　そのため、架空のテーブル名を設定しなければならない
+　　　メモ：Relationshipは中間テーブルの属性を持つため、設定した擬似テーブルも中間テーブルの扱いとなる
+　〈ポイント〉class_name:”モデル名（実在するモデル）”を記載
+　〈ポイント〉foreign_key : は、参照先のテーブルの外部キーカラム名を指定できる
+
+　　⑶ フォロー・フォロワーの一覧画面取得のため、合わせてUserモデルに下記も記載する。
+
+　　　has_many :followings, through: :active_relationships, source: :follower　　←   フォローする側
+　　　has_many :followers, through: :passive_relationships, source: :following　 ←   フォローされる側
+
+　〈ポイント〉has_many: ○○○ には、架空のワードを記載　→ このワードを使うと一覧画面が取得できる
+　〈ポイント〉through: :○○○には、⑵で設定した擬似テーブル名（中間テーブル）を記載
+　〈ポイント〉source: :○○○には、⑴で設定した擬似テーブル名（参照先のテーブル名、つまりはフォローする側ならフォローされる側のテーブル名）を記載
+
+　③ メソッドの設定
+　　フォローしているかの判定メソッドをUserモデルに記載（いいね機能と同様？）
+　　　例）def following?(user)
+  　　       　followings.include?(user)
+　　       　end
+
+　　〈ポイント〉メソッドを定義する際はアソシエーションの親側に記載する
+
+　④ routesファイルにルーティングを定義
+　　・userにネストさせる
+　　・resources ではなくresourceを使用（いいね機能と同じ）
+　　・フォロー/フォロワー一覧表示用のルートも設定
+
+　⑤ Relationshipコントローラーファイルの作成&編集
+　　・create/destroy の実装（いいね機能と同じ）
+　　・フォロー/フォロワー一覧表示用のアクションも設定
+　　　例）フォロー一覧の場合
+　　　　  def followings
+　　　　    user = User.find(params[:user_id])
+　　　　    @users = user.following_user　←  ②のアソシエーション設定でUserモデルに定義した△△△（架空のワード）を使用する！
+　　　　  end
+
+　⑥ Viewファイルの編集
+　　・各ページにフォロー/フォロワー数の表示、フォローする/フォロワーを外す のリンクを実装する
+
+　⑦ Viewファイルの作成（フォロー/フォロワー一覧表示）
+　　〈ポイント〉@usersをeachメソッドで展開する。※indexファイルと同じ方法
+　　〈ポイント〉exists?メソッド でフォロー/フォロワー一覧がいない場合を記載する
+
+
+
+検索機能実装　☆☆☆
+
+　① routesファイルにルーティングを定義
+
+　② 検索フォームの設置（Viewファイルの編集）
+
+　　⑴ sign_in時のみ表示させる ← user_signed_in?メソッドを使う
+　　⑵ form_withにはurl: search_pathを設定
+　　　例）<%= form_with url: search_path, method: :get do |f| %>
+　　⑶ f.text_fieldには属性（:content）を設定
+　　⑷ f.select（:属性）を使用するとプルダウンが生成される
+　　　・option_for_selectメソッドで、selectタグの値を設定　※ハッシュ形式（キー＝表示したい内容、値＝値）で記載
+　　　　例）<%= f.select :model, options_for_select({"User"=>"user", "Book"=>"book"}) %>
+　　　・select（1つ目）には属性（:model）を設定　※どのモデルを検索対象するのか？
+　　　・select（2つ目）には属性（:method）を設定　※どの手法で検索するのか？
+
+　③ searchコントローラーファイルを作成&アクションを定義
+
+　〈ポイント〉form_withで設定した各属性（content,model,method）をparamsで受け取り、それぞれインスタンス変数へ格納
+　〈ポイント〉@modelの中身がBookモデルor Userモデルのどちらを選択しているのか、条件分岐で記載
+
+　　例）モデル名.search_for(@content,@method)をインスタンス変数@recordsへ格納
+
+　④ User,Bookモデルにsearch_forメソッドを定義　＝検索方法の設定
+
+　〈ポイント〉
+　　・self .をつける
+　　・methodの中身によって条件分岐で設定
+　　・where メソッドを使って@contentの中身とカラム名が一致しているものを探す
+　　　例）def search_for(method, content)
+                    if method == “perfect”
+                      モデル名.where(カラム名: content)
+　　・前方一致 後方一致 部分一致には、LIKE句？とワイルドカード（”%”)を使う
+　　　例）モデル名.where(“カラム名 LIKE ?", “%”+content+”%”)   ※ ％‥‥ 任意の0文字以上の文字列
+
+　⑤ search Viewファイルの作成&定義
+
+　〈ポイント〉@modelの中身がBookモデルor Userモデルのどちらを選択しているのか、条件分岐で記載
+　〈ポイント〉@recordsをeachメソッドで展開する。※indexファイルと同じ方法
+
+
+
+非同期通信化　☆☆
+
+　① 非同期通信化したい箇所を部分テンプレートで抜き出す
+
+　〈ポイント〉eachメソッド内でのrender処理の場合、ブロック変数を指定する
+　　　例）<%= render "favorites/favorite", book: book %>
+　〈ポイント〉変更したい箇所に属性（idやclass)を付与する   ※class属性の場合すべての要素に影響する場合があるため、id属性がおすすめ！
+　　　例）<td id="favorite-buttons-<%= book.id %>"><%= render “○○○○○” %></td>
+
+　② 非同期通信設定　＝Ajaxの処理を適用させる
+
+　〈ポイント〉form_with内 に、local: false を追記する → JavaScript形式でリクエストを送る
+　〈ポイント〉link_to内に、remote: true を追記する → JavaScript形式でリクエストを送る
+
+　③ コントローラーファイルの編集
+　　・create/destroyアクションのリダイレクト先を削除 or 特定のjsファイルを指定
+
+　④ jsファイルを作成&定義
+　　・指定したセレクタのみHTMLをrenderして部分的に更新する
+
+　　　例）$(セレクタ).html("<%= j(○○○○○) %>”);　※○○○○○には部分テンプレートファイルを呼び出す記述を記載
+
+　〈ポイント〉ページ内にコメントフォームが適用されている場合は、$("textarea").val(''); でフォームの値を空にできる
+　〈ポイント〉インスタンス変数を設定 ← controllerのcreate/destroyアクションで定義されたインスタンス変数が渡される
+　　　　　　　　　例）  $(".favorite-btn").html("<%= j(render 'favorites/favorite-btn', book: @book) %>");
+
+　⑤ コントローラーファイルのインスタンス変数を定義
+　　・jsファイルに渡すためのインスタンス変数を修正、設定
+
+
+
+ゲストログイン機能実装  ☆☆☆
+
+　① sessionsコントローラーファイル（ゲストログイン用）の作成、編集
+　　※ログイン機能はsessions_controller.rbに記述されているが、これはGemでインストールされているため、目に見えないファイル
+　　　そのため、ゲストログイン用にDeviseのsessions_controller.rbの機能を継承して実装しなければならない
+
+　　・app/controllersの配下にusersフォルダ → sessions_controller.rbを作成、以下を記載する
+
+　  　　class Users::SessionsController < Devise::SessionsController
+　　　    def guest_sign_in
+　　　      user = User.guest　←　後ほどメソッドを定義
+　　　      sign_in user
+　　　      redirect_to ○○○_path(user.id)
+　　　    end
+　　  　end
+
+　② routesファイルにルーティングを定義
+
+　〈ポイント〉httpメソッドは”post”
+　〈ポイント〉devise_scope:user を使いネストさせる
+
+　③ Userモデルにguestメソッドを定義
+
+　　def self.guest
+    　  find_or_create_by!(name: 'guestuser' ,email: 'guest@example.com') do |user|
+      　  user.password = SecureRandom.urlsafe_base64
+      　  user.name = "guestuser"
+    　  end
+  　  end
+
+　〈ポイント〉find_or_create_by(条件)は、(条件)としたデータが存在するかを判断した上で「trueの場合→そのデータを返す」「falseの場合→新規作成」の処理をする
+　〈ポイント〉find_or_create_by!の「!」を付与すること
+　〈ポイント〉SecureRandom.urlsafe_base64は、ランダムな文字列を生成する
+
+　④ ゲストログインボタン（リンク）を配置する
+
+　　例）<%= link_to 'ゲストログイン', users_guest_sign_in_path, method: :post %>
+
+　※ プロフィール編集を行えないように設定する
+　　・プロフィール編集画面のボタンを表示しない処理
+　　　例）<% if user.name != "guestuser" %>
+
+　　・URLに直接入力して編集画面へ遷移ができない処理
+　　　例）before_action :ensure_guest_user, only: [:edit]
+　　　　　def ensure_guest_user
+　　　　　  @user = User.find(params[:id])
+　　　　 　 if @user.name == "guestuser"
+　　　　    　redirect_to ○○○_path(current_user.id)
+　　　　  　end
+　　　　　end
