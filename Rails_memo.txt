@@ -345,3 +345,143 @@ Bootstrapの導入方法　☆☆☆
 　　　　    　redirect_to ○○○_path(current_user.id)
 　　　　  　end
 　　　　　end
+
+グループ機能実装　☆☆☆
+
+　① Groupモデル・GroupUserモデル（中間テーブル）を作成　
+　
+　〈ポイント〉Groupモデルのカラムは”name”と”introduction”と”owner_id（グループオーナー）”
+　〈ポイント〉GroupUserモデル（中間テーブル）のカラムは”user_id”と”group_id”
+
+《イメージ図》
+￼
+
+　②各モデルにアソシエーションを設定
+　　⑴ Userモデル内ではGroupテーブルとGroupUser中間テーブルに対するアソシエーションを記載
+　　　例）has_many :group_users, dependent: :destroy
+　　　　　has_many :groups, through: :group_users
+
+　〈ポイント〉中間テーブルを通して繋がっているものには、 through: :group_users（中間テーブル名）のkeyをつける
+　〈ポイント〉through: ○○○（中間テーブル名）は複数形
+
+　　⑵ Groupモデル内ではUserテーブルとGroupUser中間テーブルに対するアソシエーションを記載
+　　　例）has_many :group_users, dependent: :destroy
+　　　　　has_many :users, through: :group_users
+　　　　　belongs_to :owner, class_name: "User", foreign_key: :owner_id　
+
+　〈ポイント〉Groupモデルには多対多のためのアソシエーションに加えて、Group作成者カラム（owner_id）のためのアソシエーションを設定する
+　　　メモ：グループの作成者（owner）は１人なので、group (子)とowner (親)は belongs_toの関係である
+　　　　　　ownerテーブルがあればいいのだが、ownerは結局はuserと同じなため、userテーブルを利用するけれども、テーブルの名前をuserではなくownerと読み替えさせるようにする
+　　　　　　⇒　belongs_to :自分で設定するテーブルの読み方, class_name: "元となるモデル名", foreign_key: :owner_id
+
+　　⑶ GroupUserモデルには以下を記載
+　　　例）belongs_to :user
+　　　　　belongs_to :group
+
+　③ routesファイルにルーティングを定義
+
+　④ groupsコントローラーファイルの作成&編集
+　　・new, create, index, show, edit, updateアクションを定義する
+
+　〈ポイント〉作成した人がグループオーナーとなる設定をする
+　　　createアクションの際、owner_idカラムにcurrent_user.idを代入する　
+　　　　例）@group.owner_id = current_user.id
+
+　⑤ Viewファイルの作成&編集
+　　・new, index, show, editファイルを作成する
+
+　⑥ グループに参加する/ グループから退出する 機能の作成　   ※いいね機能と同様の実装方法
+　　⑴ routesファイルにルーティングを定義
+　　　・groupにネストさせる
+
+　　⑵ group_usersコントローラーファイルの作成&編集
+
+　　⑶ Viewファイルの編集   
+　　　・各ページにメンバー数/メンバーの名前を表示、グループに参加する/ グループから退出する ボタンを作成
+
+　〔注意〕グループ作成者がグループメンバーに含まれるよう、groupsコントローラーファイルに下記を追記する！
+
+　　　例）@group.users << current.user
+
+
+メール送信機能実装　☆☆
+
+　① Action Mailerを導入する
+　　・ rails generate mailer ContactMailer（任意の名称）を実行
+　　　→　mailerフォルダに、contact_mailer.rbファイルが生成される
+
+　② サーバーを設定する
+　　・config/environments/development.rbにメール送信設定を記載（最下部）する
+
+　　　  config.action_mailer.raise_delivery_errors = true
+　　　  config.action_mailer.delivery_method = :smtp
+　　　  config.action_mailer.smtp_settings = {
+　　　    port:                     587,
+　　　    address:              'smtp.gmail.com',
+　　　    domain:               'gmail.com',
+　　　    user_name:         'メルアド',　　　　　← 自分Gmailのアドレス
+　　　    password:           'アプリパスワード',　← 自分のGmailのアプリパスワード
+　　　    authentication:   'login',
+　　　    enable_starttls_auto: true
+　　　  }
+
+　③ mailerファイルを編集
+　　・application_mailerファイルに以下を記載する
+
+　　　　default from: 'from@example.com'
+　　　　layout 'mailer'
+
+　　〈ポイント〉application_mailerファイルは、全メーラー共通の設定ができるファイル　＝contollerのメール版？
+
+
+　⑤ メール送信用のページを作成する　※ここではevent_noticesとする
+　　⑴ routesファイルにルーティングを定義
+　　　・groupsルートにネストさせる
+　　　・アクションはnew, createのみでOK
+
+　　⑵ event_noticesコントローラーファイルの作成&編集
+　　　・newアクションを記載する
+　　　・createアクションを記載する
+
+　　　〈ポイント〉⑶のform_withで設定した各変数（メールタイトル・メール本文）をparamsで受け取り、それぞれインスタンス変数へ格納
+　　　〈ポイント〉メンバー全員にメールを送るため、@group = Group.find(params[:group_id])→@group.usersでメンバー情報を取得する
+　　　〈ポイント〉メールタイトル、本文、メンバー情報を、Action Mailerで導入したmailerファイルのsend_mailアクションへわたす
+
+　　　例）    ContactMailer.send_mail(@mail_title, @mail_content,group_users).deliver
+　　　　　　　※deliverメソッドは、メーラーを起動して返ってきたメールのデータを送信する
+
+　　　〈ポイント〉render で、sent ファイル（送信完了画面）に飛ばす
+
+　　⑶ Viewファイルの作成&編集　※サーチ機能実装方法と同様の流れ
+　　　・newファイル（メール作成画面）を作成する
+
+　　　〈ポイント〉form_with url: 〇〇○（パス名）,model: :create 構文で、createルートに繋げる
+　　　〈ポイント〉f.text_△△△:×××で、「メールタイトル」「メール本文」を変数？に格納する
+
+　　　・sent ファイル（送信完了画面）を作成する
+
+　　⑷ mailerファイルの編集
+　　　・Action Mailerで導入したmailerファイル（ここではcontact_mailer.rb）を編集する
+　　　・⑵で記載したsend_mailメソッドを定義する　＝＞　受け取った値をテキストファイルに渡し、メールを送信する
+
+　　　　    def send_mail(mail_title,mail_content,group_users) #メソッドに対して引数を設定
+　　  　　    @mail_title = mail_title
+　  　　　    @mail_content = mail_content
+  　　　　    mail bcc: group_users.pluck(:email), subject: mail_title
+　　　　    end
+　　　
+　　　〈ポイント〉send_mailメソッドで受け取った引数（メールタイトル・本文）をインスタンス変数へ格納する＋タイトルをsubject: に渡す
+　　　〈ポイント〉send_mailメソッドで受け取った引数（メンバー情報）をpluck メソッドでEmail情報 を抜き出し、bcc: に渡す
+ 　　　　　　　　　※モデル名.pluck(カラム名）＝＞　指定したモデルカラム情報全てを配列で返す
+
+　　⑸ メール本文を作成する（メーラーのView画面を作成）
+　　　・app/views/contact_mailerディレクトリ下にsend_mail.text.erb（テキストファイル）を作成
+
+　　　　=========================================
+　　　　　New event from <%= @group.name %>!!
+　　　　=========================================
+　　　　　Title: <%= @title %>
+　　　　　Details:<%= @body %>
+
+　〔注意〕development.rbにはメールアドレスと、アプリパスワードが記載されているため、githubにそのままプッシュしてはいけない
+　　　　　⇒ dotenvを導入して環境変数を設定する！
