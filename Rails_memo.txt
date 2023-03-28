@@ -485,3 +485,107 @@ Bootstrapの導入方法　☆☆☆
 
 　〔注意〕development.rbにはメールアドレスと、アプリパスワードが記載されているため、githubにそのままプッシュしてはいけない
 　　　　　⇒ dotenvを導入して環境変数を設定する！
+
+
+Rubocopの実装&解析　☆
+
+　Rubucopとは‥‥コーディング規約に遵守されているかチェックを行う、コード解析ツール
+
+　① Rubucopをインストールする
+　 　⑴「Gemfile」のdevelopmentグループに以下を追記
+　　　group :development do
+　　　:
+　　　:
+　　　  gem 'rubocop', require: false
+　　　  gem 'rubocop-performance', require: false
+　　　  gem 'rubocop-rails', require: false
+　　　  gem 'rubocop-minitest', require: false
+　　　  gem 'rubocop-packaging', require: false
+　　　  gem 'rubocop-rspec'
+　　　end
+　　⑵ bundle install を実行
+
+　② Rubocop設定ファイルの作成
+  　   bundle exec rubocop --auto-gen-config を実行 → rubocop.ymlファイルを生成&編集
+　　　※.rubocop.ymlに追記する内容が多いため、ここでは割愛（https://web-camp.online/lesson/curriculums/275/contents/1533）
+
+　③ Rubocopの解析
+　　 bundle exec rubocop を実行
+　　　〈ポイント〉
+　　　　・ Inspecting　‥‥ 解析したファイル数
+　　　　・ Offenses  　‥‥ コーディング違反箇所
+　　　　・ 解析の実行コマンドに-aのオプションをつけた場合、コーディング違反を修正してくれる！
+
+　　■ ファイル単位で解析する場合
+　　　　username:~/environment/アプリケーション名 $ bundle exec rubocop -a {解析対象ファイル}
+　　■ フォルダ単位で解析する場合
+　　　　username:~/environment/アプリケーション名 $ bundle exec rubocop -a {解析対象フォルダ}
+
+
+
+バッチ処理　☆
+
+　「バッチ」とは‥‥“一定量の(あるいは一定期間の)データを集め、プログラムによる一括処理するための処理方法”
+
+　バッチ処理の実装方法（投稿したデータを2分おきに全て削除するバッチ処理を実装する場合）
+
+　　⑴ 削除プログラムを作成
+　　　ⅰ.  app/libの配下にbatchフォルダを作成。 ※app/libではない？
+　　　ⅱ. batchフォルダの中にdata_reset.rbファイルを作成&以下を記述して保存。
+
+　　　　class Batch::DataReset
+　　　　  def self.data_reset
+　　　　    Book.delete_all
+　　　　    p "投稿を全て削除しました"
+　　　　  end
+　　　　end
+
+　　　ⅲ. config/application.rbに以下を追記　←　作成したapp/lib/batch/data_reset.rbが読み込まれる。
+
+　　　　class Application < Rails::Application
+　　　　  :
+　　　　  config.paths.add 'lib', eager_load: true　←　基本この行だけ追記！
+　　　　end
+
+　　⑵ cron（クーロン）を使用しての自動化設定
+
+　　　「cron（クーロン）」とは‥‥定期的に指定のプログラムを実行するためのスケジューラー
+
+　　　ⅰ. cronの状態確認
+　　　　  sudo systemctl status crondを実行  → Active: active (running)…の表記があれば、cronは常駐プログラムとして起動している。
+
+　　　ⅱ. crontab※ に実行内容を登録　※crontabはcronに実行してもらう設定を編集するための管理コマンド　
+　　　　   crontab -e を実行 → 登録 → 保存
+　　　　　※登録内容は様々なため、ここでは割愛
+
+　　　ⅲ. cronを起動
+　　　　   sudo systemctl restart crond を実行
+
+　　　　※確認が終わったら、必ずcronを停止する
+　　　　　sudo systemctl stop crond を実行
+
+
+
+doting-rails（ドットエンブ）　☆☆
+
+　「dotenv」とは‥‥環境変数を管理する事が出来るgem → 環境変数として指定した変数はGithubなどにアップロードされない
+
+
+　① dotenvをインストールする
+　 　「Gemfile」の最終行に gem ”doting-rails” を追記 → bundle install を実行
+
+　② アプリケーション直下に、.envファイルを作成
+
+　③ .envファイルに環境変数の記述
+　　〈ポイント〉SECRET_KEY=○○○  の形で記述
+　　〈ポイント〉環境変数設定後の確認方法
+　　　　⑴ rails cを実行
+　　　　⑵ ENV['SECRET_KEY’]を実行
+
+　④ 使用方法　＝　ソースコード内で環境変数を使用する
+　　〈ポイント〉ファイルには　env[’SECRET_KEY’]　 の形で記述！
+
+　⑤ .gitignoreに.envを追加する
+　　〈ポイント〉Gitの管理下に置きたくないファイルやフォルダは.gitignoreファイルに記載
+　　　　例）.gitignoreファイルの最終行に/.envと入力して保存
+
