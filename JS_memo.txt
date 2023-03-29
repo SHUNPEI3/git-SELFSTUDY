@@ -1,0 +1,148 @@
+Swiper(JavaScript)の実装　☆☆☆
+
+　「Swiper（スワイパー）」とは‥‥スライドショーを簡単に作成できるJavaScriptのプラグイン
+　
+　必要なファイル‥‥ .htmlファイル、.cssファイル、.jsファイル、imgフォルダ（スライドショー用）
+
+　① CDNでファイルを読み込む
+　　　.htmlファイルの<head>タグ内に下記を追記する
+
+　　    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css"/>
+    　　<script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
+    　　<link rel="stylesheet" href=“○○○.css" />
+
+　② スライドショー箇所のHTMLを記載
+　　〈ポイント：Swiperで実装する際に必須であるCSSのclassが３つ存在する〉
+　　　1. swiper（スライドショー箇所全体を内包する要素）
+	　2. swiper-wrapper（スライド部を内包する要素）
+	　3. swiper-slide（各スライドを入れる要素）
+
+　③ CSSファイルに記載
+　　〈ポイント：CSSファイルには２箇所の設定をする〉
+　　　⒈ スライド画像の幅と高さ
+　　　⒉ スライドショーパーツの色設定
+
+　④ JSファイルに以下を記載
+
+　　const swiper = new Swiper('.swiper', {　← オプションの設定
+　　  loop: true,　　　　　　　　　　　　　　　← 最後までスライドしたら最初の画像に戻る
+　　  pagination: { 　　　　　　　　　　　　  ← ページネーション表示の設定
+　　    el: '.swiper-pagination', 　　　　　　　   ← ページネーションの要素
+　　  },
+　　  navigation: { 　　　　　　　　　　　　  ← ナビゲーションボタン（矢印）表示の設定
+　　    nextEl: '.swiper-button-next',　　　　　 ←「次へボタン」要素の指定
+　　    prevEl: '.swiper-button-prev', 　　　   　←「前へボタン」要素の指定
+　　  }
+　　});
+
+　⑤ .jsファイルを.htmlファイルの</body>の直前で読み込みさせる
+
+
+
+「トップへ戻る」の実装(JavaScript)　☆☆☆
+
+　必要なファイル‥‥ .htmlファイル、.cssファイル、.jsファイル、jqueryファイル、imgフォルダ（「トップへ戻る」ボタン用）
+
+　① HTMLファイルにトップに戻るボタンを追加
+　　例）<span id="back"><a href="#"><img src="img/○○○.png" alt=""></a></span>
+　　　　　※<a href="#">は、そのページの最上層へ移動するリンク
+　　
+　② CSSファイルでトップに戻るボタンを装飾
+　　例）#back {position: fixed; right: 20px; bottom: 20px;}
+　　　　#back img {width: 50px;}
+
+　〈ポイント〉position: fixed; を指定することで、「トップへ戻る」ボタンは常に同じ位置（右下20px）に表示される。
+
+　③ jQueryで「マウスクリック」イベントを設定する
+　　 .jsファイルに、以下を記載
+
+　　　$(function() {　　　　　　　　　　　　　　
+　　　  $('#back a').on('click',function(){　←   #back内のaタグがクリックされたときの処理
+　　　    $('body, html').animate({scrollTop:0}, 800);　←　scrollTop:0＝「最上部に移動する」, 800＝「800ミリ秒間（0.8秒間）」
+　　　  });
+　　　});
+
+　　〈ポイント〉animateは、({変化対象のプロパティ名:変化値}, アニメーションの動作時間)を指定する
+
+
+
+ハンバーガーメニューの実装　☆☆☆
+
+　必要なファイル‥‥ .htmlファイル、.cssファイル、.jsファイル、jqueryファイル
+
+　① HTMLファイルにハンバーガーメニューボタンを追加&CSSファイルで装飾
+　　　※ハンバーガーメニュー実装方法は下記参照
+
+　② HTMLファイルにメニューリストを追加
+
+　③ メニューリストが閉じた状態（デフォルト）を設定　＝画面外に配置
+
+　　　#menu {
+　　　  position: fixed;
+　　　  top: 0;
+　　　  right: -300px;　←  マイナス値に設定することで画面外に設置できる
+　　　  width: 300px;
+　　　  height: 100%;
+　　　  background-color: #333;
+             transition: transform 0.3s;     ← メニューを表示する際に「動き」がつく
+　　　}
+
+　〈ポイント〉position: fixed;　top: 0;　right: -○○px;は必ず設定すること　
+
+　④ メニューリストが開いた状態（active）をCSSファイルに作成
+
+　　　.active {
+　　　  transform: translate3d(-300px,0,0);　← ③で設定した「right」と同じ設定
+　　　}
+
+　〈ポイント〉 transformは、与えられた要素を回転、拡大縮小、傾斜、移動するための関数
+　〈ポイント〉 translate3d()は、要素を三次元空間内で平行移動するための関数
+
+　⑤ jQueryで「マウスクリック」イベントを設定する　（ハンバーガーメニューボタンを押すとメニューリストを表示する）
+
+　　$(function(){
+　　  $('.menu-trigger').on('click',function(){
+　　    $('#menu').toggleClass(‘active’);
+　　  })
+　　})
+
+　〈ポイント〉toggleClass()は、指定されているclassをトグル処理するメソッド
+　　　　　　　該当のclass属性がある場合にはclassが削除されない場合にはclassが追加される
+
+
+　※ハンバーガーメニュー実装方法(コピペ推奨)
+
+　⑴ HTMLファイルに下記を記載
+
+	<div class="menu-trigger">
+	　<span></span>
+	　<span></span>
+	　<span></span>
+	</div>
+
+　⑵ CSS ファイルに下記を記載
+
+　　.menu-trigger{
+　　  position: fixed;
+　　  top: 20px;　
+　　  right: 20px;
+　　  width: 30px;
+　　  height: 20px;
+　　  cursor: pointer;  ← マウスカーソルをリンクポインタに指定
+　　}
+　　.menu-trigger span {
+　　  position: absolute;
+　　  width: 30px;
+　　  height: 4px;
+　　  background: #666;
+　　}
+　　.menu-trigger span:nth-child(1) {
+　      top: 0
+　　}
+　　.menu-trigger span:nth-child(2) {
+　　  top: 10px
+　　}
+　　.menu-trigger span:nth-child(3) {
+　　  top: 20px
+　　}
+
