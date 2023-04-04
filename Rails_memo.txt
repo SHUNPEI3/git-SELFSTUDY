@@ -4,21 +4,21 @@ DWC  ONLINE メモ
 画像投稿実装 ☆☆☆
 
 ① ActiveStorageをインストール
- ・$ rails active_storage:install → $ rails db:migrate を実行
+  ・$ rails active_storage:install → $ rails db:migrate を実行
 
 ② 画像投稿するモデルに以下を追加
- ・has_one_attached :image
+  ・has_one_attached :image
 
 ③ 画像のサイズ変更を行うGemを導入
- ・gemファイルのimage_processingのコメントアウトを外す
+  ・gemファイルのimage_processingのコメントアウトを外す
    # gem 'image_processing', '~>1.2’ → gem 'image_processing', '~>1.2'
-    ・bundle installを実行する
+  ・bundle installを実行する
 
 ④ config/environments/development.rbに以下を追加
- ・ config.active_job.queue_adapter = :inline
+  ・ config.active_job.queue_adapter = :inline
 
 ⑤ メソッドを設定
- ・画像投稿するモデルに画像投稿メソッドを追加する＋引数に設定した値に画像のサイズを変換できるようにも
+  ・画像投稿するモデルに画像投稿メソッドを追加する＋引数に設定した値に画像のサイズを変換できるようにも
 
   def get_image(width, height)
     unless image.attached?
@@ -40,10 +40,10 @@ device機能実装時の各種設定 ☆☆☆
   ⑶ usersコントローラーファイルの作成&編集
      指定したデータ（name）を保存できるよう、ApplicationControllerに以下を記載する
      例）  before_action :configure_permitted_parameters, if: :devise_controller?
-         protected
-         def configure_permitted_parameters
-        devise_parameter_sanitizer.permit(:sign_up, keys: [:name]) ←   (:deviseの処理名, keys: [:許可するキー])
-         end
+           protected
+           def configure_permitted_parameters
+            devise_parameter_sanitizer.permit(:sign_up, keys: [:name]) ←   (:deviseの処理名, keys: [:許可するキー])
+           end
 
  ● ログイン時に名前（name）を入力してログインできるように修正
   ・deviseの設定ファイルであるconfig/initializers/devise.rbファイルの以下を修正
@@ -57,12 +57,12 @@ device機能実装時の各種設定 ☆☆☆
           end
 
  ● サインアップ(新規登録後)のページ遷移先設定方法
-  ※参考サイト：https://qiita.com/akkyta/items/ea7ffdb8159a797632a4
+   ※参考サイト：https://qiita.com/akkyta/items/ea7ffdb8159a797632a4
 
  ● 権限の設定をする ＝ ログイン認証が成功していないと、特定以外の画面（ログインと新規登録は除く）は表示できない仕様にする
   ・ApplicationControllerに以下を記載する
-            例）  before_action :authenticate_user!, except: [:○○○]
-   ※exceptは指定したアクションをbefore_actionの対象から外すことができる。
+    例）  before_action :authenticate_user!, except: [:○○○]
+    ※exceptは指定したアクションをbefore_actionの対象から外すことができる。
 
  ● ログイン済み他ユーザーからのアクセスを制限
    before_action:  メソッド名を設定する
@@ -117,8 +117,8 @@ Bootstrapの導入方法 ☆☆☆
 〈ポイント〉メソッドの設定
  ・いいねしているかの判定メソッドをBookモデル（親モデル）に記載
    例）def favorited_by?(user)
-          favorites.exists?(user_id: user.id)
-     end
+        favorites.exists?(user_id: user.id)
+       end
 
 〈ポイント〉routesの設定
  ・bookにネストさせる
@@ -128,7 +128,7 @@ Bootstrapの導入方法 ☆☆☆
  ・destroyアクションはuser_idとbook_idの２つを削除する必要あり
    例）book = Book.find(params[:book_id])
         favorite = current_user.favorites.find_by(book_id: book.id)
-     favorite.destroy
+       favorite.destroy
 
 
 
@@ -160,19 +160,19 @@ Bootstrapの導入方法 ☆☆☆
  ② アソシエーションを設定
   ⑴ Relationshipモデル（中間テーブル）には以下を記載
 
-      belongs_to :following, class_name: "User" ←   フォローする側
-      belongs_to :follower, class_name: "User"   ←   フォローされる側
+    belongs_to :following, class_name: "User" ←   フォローする側
+    belongs_to :follower, class_name: "User"   ←   フォローされる側
 
  〈ポイント〉belongs_to: ○○○ には、参照先したい擬似テーブル名を記載
    メモ：本当はbelongs_to: userとしたいのだが、フォローする側とフォローされる側のどちらともUserのため、名前の重複が起きてしまい記述できない
-      そのため、架空のテーブル名を設定しなければならない
+         そのため、架空のテーブル名を設定しなければならない
  〈ポイント〉class_name:”モデル名（実在するモデル）”と記載することで、実在するモデル内のテーブルからデータを取得できる
 
    例）belongs_to 変更したい親モデル名, class_name: "元々の親モデル名"
 
   ⑵ Userモデルには以下を記載
 
-   has_many :active_relationships, class_name: "Relationship”, foreign_key: :following_id       ←   フォローする側
+   has_many :active_relationships, class_name: "Relationship”, foreign_key: :following_id    ←   フォローする側
    has_many :passive_relationships, class_name: "Relationship”, foreign_key: :follower_id    ←   フォローされる側
 
  〈ポイント〉has_many: ○○○ には、参照先したい擬似テーブル名を記載
