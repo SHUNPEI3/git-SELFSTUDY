@@ -337,64 +337,64 @@
 
 ## IO
 
-* STDIN  組み込み定数
-* $stdin
-* STDOUT  組み込み定数
-* $stdout
-* io = File.open(file[, mode[, perm]][, opt]
+  - STDIN  組み込み定数
+  - $stdin
+  - STDOUT  組み込み定数
+  - $stdout
+  - io = File.open(file[, mode[, perm]][, opt]
     * r  読み込み専用
     * r+  読み込み/書き込み用
     * w  書き込み専用(新規作成)
     * w+  読み込み/書き込み用
     * a  追加書き込み用
     * a+  読み込み/追加書き込み
-* file.close
-* File.read(file,[, length[, offset]]  lengthは読み込むサイズ、offsetには先頭何バイト目から読み込むか
-* File.binread(file,[, length[, offset]]
-* File.write(file, date[, length[, offset]]
-* io.gets  1行ずつ読み込む
+  - file.close
+  - File.read(file,[, length[, offset]]  lengthは読み込むサイズ、offsetには先頭何バイト目から読み込むか
+  - File.binread(file,[, length[, offset]]
+  - File.write(file, date[, length[, offset]]
+  - io.gets  1行ずつ読み込む
     * io.each
     * io.each_line
-* io.readline  改行区切りで配列として返す
-* io.each_char 1文字ずつ読み込む
-* io.getc 1文字だけ読み込む
-* io.read(size)  長さを指定して読み込む
-* io.puts
-* io.pos  ファイルポインタの現在位置取得
-* io.seek(offset, whence)  ファイルポインタを移動する
+  - io.readline  改行区切りで配列として返す
+  - io.each_char 1文字ずつ読み込む
+  - io.getc 1文字だけ読み込む
+  - io.read(size)  長さを指定して読み込む
+  - io.puts
+  - io.pos  ファイルポインタの現在位置取得
+  - io.seek(offset, whence)  ファイルポインタを移動する
     * SEEK_SET  offsetの位置に移動する
     * SEEK_CUR  offsetを現在の相対位置と見なし移動する
     * SEEK_END  offsetをファイル末尾からの相対位置とし移動する
-* io.rewind  ポインタを先頭に戻す
+  - io.rewind  ポインタを先頭に戻す
 
 
 ## File
 
-* File.rename(“before”, “after”) ファイル名変更/ファイル移動  ※Fileクラスのみ
-* File.delete(file) ファイル削除
+  - File.rename(“before”, “after”) ファイル名変更/ファイル移動  ※Fileクラスのみ
+  - File.delete(file) ファイル削除
     * File.unlink(file)
-* Dir.pwd  ※Dirクラスのみ
-* Dir.chdir(dir)  ※Dirクラスのみ
-* Dir.open(path)  フォルダ内容を読む
-* Dir.close
-* dir.read
-* Dir.mkdir(path)  新しいフォルダを作成
-* Dir.rmdir(path)  フォルダを削除
+  - Dir.pwd  ※Dirクラスのみ
+  - Dir.chdir(dir)  ※Dirクラスのみ
+  - Dir.open(path)  フォルダ内容を読む
+  - Dir.close
+  - dir.read
+  - Dir.mkdir(path)  新しいフォルダを作成
+  - Dir.rmdir(path)  フォルダを削除
     * Dir.delete
-* Dir.home
-* File.chmod(mode, path)  ファイルpathの許可モード変更
-* File.chown(owner, group, path)ファイルpathの所有者を変更
-* File.basename(path)  拡張子を除いたファイル名を取得
-* File.dirname(path)  ディレクトリ名を取得
-* File.extname(path)  拡張子を取得
-* File.split(path)  ディレクトリ名とファイル名に分解→配列で返す
-* File.join(name1, name2…)
+  - Dir.home
+  - File.chmod(mode, path)  ファイルpathの許可モード変更
+  - File.chown(owner, group, path)ファイルpathの所有者を変更
+  - File.basename(path)  拡張子を除いたファイル名を取得
+  - File.dirname(path)  ディレクトリ名を取得
+  - File.extname(path)  拡張子を取得
+  - File.split(path)  ディレクトリ名とファイル名に分解→配列で返す
+  - File.join(name1, name2…)
 
-* Time.new = Time.now
-* t.year
-* t.month
-* t.day
-* t.strftime(format) = t.to_s
+  - Time.new = Time.now
+  - t.year
+  - t.month
+  - t.day
+  - t.strftime(format) = t.to_s
     * %Y  西暦4桁
     * %y  西暦下2桁
     * %M  分
@@ -402,25 +402,25 @@
     * %D  %m/%d/%yと同じ
     * %x  %Dと同じ
     * %F  %Y-%m-%dと同じ
-* Time.parse(str)  文字列から時間に変化する
+  - Time.parse(str)  文字列から時間に変化する
     * Time.strptime(str,format)
-* Date.parse(str)  文字列から時間に変化する
+  - Date.parse(str)  文字列から時間に変化する
     * Date.strptime(str, format)
-* to_time
-* to_date
+  - to_time
+  - to_date
 
 
-# クラス
+## クラス
 
-initializeメソッド
-　クラスからオブジェクトを作成する場合はnewメソッドを使います。このときに呼ばれるのがinitializeメソッドです。initializeメソッドに引数を付けると、newメソッドを呼ぶときにも引数が必要になります。
+  initializeメソッド
+　  クラスからオブジェクトを作成する場合はnewメソッドを使います。このときに呼ばれるのがinitializeメソッドです。initializeメソッドに引数を付けると、newメソッドを呼ぶときにも引数が必要になります。
 
-インスタンス変数とアクセサメソッド
+  インスタンス変数とアクセサメソッド
 
-* インスタンス変数
-インスタンス変数とは同じインスタンス（同じオブジェクト）の内部で共有される変数です。インスタンス変数はクラスの外部から参照することができません
+  インスタンス変数
+    インスタンス変数とは同じインスタンス（同じオブジェクト）の内部で共有される変数です。インスタンス変数はクラスの外部から参照することができません
 
-* nameメソッドのように値を読み出すメソッドを「ゲッターメソッド」、name=メソッドのように値を書き込むメソッドを「セッターメソッド」と呼びます。また、ゲッターメソッドとセッターメソッドを総称して、「アクセサメソッド」と呼びます。
+   nameメソッドのように値を読み出すメソッドを「ゲッターメソッド」、name=メソッドのように値を書き込むメソッドを「セッターメソッド」と呼びます。また、ゲッターメソッドとセッターメソッドを総称して、「アクセサメソッド」と呼びます。
 
 * 単純にインスタンス変数の内容を外部から読み書きするのであれば、attr_accessorというメソッドを使ってアクセスメソッドの定義を省略することができます
 例）attr_accessor :name
