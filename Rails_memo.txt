@@ -1,4 +1,4 @@
-DWC  ONLINE メモ
+DWC ONLINE メモ
 
 
 画像投稿実装 ☆☆☆
@@ -11,11 +11,11 @@ DWC  ONLINE メモ
 
 ③ 画像のサイズ変更を行うGemを導入
   ・gemファイルのimage_processingのコメントアウトを外す
-   # gem 'image_processing', '~>1.2’ → gem 'image_processing', '~>1.2'
+    # gem 'image_processing', '~>1.2’ → gem 'image_processing', '~>1.2'
   ・bundle installを実行する
 
 ④ config/environments/development.rbに以下を追加
-  ・ config.active_job.queue_adapter = :inline
+  ・config.active_job.queue_adapter = :inline
 
 ⑤ メソッドを設定
   ・画像投稿するモデルに画像投稿メソッドを追加する＋引数に設定した値に画像のサイズを変換できるようにも
@@ -33,41 +33,41 @@ DWC  ONLINE メモ
 device機能実装時の各種設定 ☆☆☆
 
  ● 初期状態のdevise から、名前（name）を保存できるように修正
-  ⑴ migration ファイルの修正
-    名前（name）を保存するカラムがないため、カラムの追加をする
-  ⑵ Viewファイルの実装&修正
+   ⑴ migration ファイルの修正
+     名前（name）を保存するカラムがないため、カラムの追加をする
+   ⑵ Viewファイルの実装&修正
      rails g devise:viewsでView ファイルを作成 → ユーザ登録の際に ”name” を登録するためのフォーム(form_with)を追加
-  ⑶ usersコントローラーファイルの作成&編集
+   ⑶ usersコントローラーファイルの作成&編集
      指定したデータ（name）を保存できるよう、ApplicationControllerに以下を記載する
-     例）  before_action :configure_permitted_parameters, if: :devise_controller?
-           protected
-           def configure_permitted_parameters
-            devise_parameter_sanitizer.permit(:sign_up, keys: [:name]) ←   (:deviseの処理名, keys: [:許可するキー])
-           end
+     例）
+       before_action :configure_permitted_parameters, if: :devise_controller?
+       protected
+       def configure_permitted_parameters
+         devise_parameter_sanitizer.permit(:sign_up, keys: [:name]) ←   (:deviseの処理名, keys: [:許可するキー])
+       end
 
  ● ログイン時に名前（name）を入力してログインできるように修正
   ・deviseの設定ファイルであるconfig/initializers/devise.rbファイルの以下を修正
-    ⑴ # config.authentication_keys = [:email] のコメントアウトを外す
-    ⑵ config.authentication_keys = [:name] に修正
+     ⑴ # config.authentication_keys = [:email] のコメントアウトを外す
+     ⑵ config.authentication_keys = [:name] に修正
 
  ● サインイン後、ログアウト後の遷移先を指定
   ・ApplicationControllerに以下を記載する
-        例）def after_sign_in_path_for(resource)  または  after_sign_out_path_for(resource)
-            ○○○○○_path
-          end
+     例）def after_sign_in_path_for(resource)  または  after_sign_out_path_for(resource)
+           ○○○○○_path
+         end
 
  ● サインアップ(新規登録後)のページ遷移先設定方法
    ※参考サイト：https://qiita.com/akkyta/items/ea7ffdb8159a797632a4
 
  ● 権限の設定をする ＝ ログイン認証が成功していないと、特定以外の画面（ログインと新規登録は除く）は表示できない仕様にする
   ・ApplicationControllerに以下を記載する
-    例）  before_action :authenticate_user!, except: [:○○○]
-    ※exceptは指定したアクションをbefore_actionの対象から外すことができる。
+     例）  before_action :authenticate_user!, except: [:○○○]
+      ※exceptは指定したアクションをbefore_actionの対象から外すことができる。
 
  ● ログイン済み他ユーザーからのアクセスを制限
-   before_action:  メソッド名を設定する
+    before_action:  メソッド名を設定する
 ￼
-
  ● 管理者(Admin)アカウントの実装方法
   ※参考サイト：https://onl.sc/SG3E8zy
 
