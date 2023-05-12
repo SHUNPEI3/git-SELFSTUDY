@@ -613,15 +613,3 @@ Math::PI
  MVCとは、ソフトウェアの設計モデルの一つで、機能を「Model」（モデル）、「View」（ビュー）、「Controller」（コントローラ）の三つの役割に分離して実装し、それらが連携して処理を進める方式。
  多くのWebアプリケーション設計に用いられている手法です。
  Ruby on RailsでもMVCモデルをベースとした作りになっています。
-
- Ruby on RailsにおけるMVCの役割
-● Model
- Controllerの命令を受け、データに関する処理を行い、結果をControllerへ返却します。
- 処理はデータベースとのやり取り、データ加工、データチェック等です。
-
-● View
- Controllerの命令を受け、ブラウザに表示するHTMLを生成し、Controllerへ返却します。
- 表示に必要な情報はControllerからもらいます。
-
-● Controller
- ModelとViewへ処理の命令を行い、リクエストを受けた結果をレスポンスします。

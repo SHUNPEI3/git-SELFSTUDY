@@ -599,3 +599,34 @@ created_atを日本時間で表示する ★
 
 プルダウンメニュー作成 ★
  ※参考サイト：https://zenn.dev/yusuke_docha/articles/89b49fd29c16c6
+
+
+ Ruby on RailsにおけるMVCの役割
+● Model
+ Controllerの命令を受け、データに関する処理を行い、結果をControllerへ返却します。
+ 処理はデータベースとのやり取り、データ加工、データチェック等です。
+
+● View
+ Controllerの命令を受け、ブラウザに表示するHTMLを生成し、Controllerへ返却します。
+ 表示に必要な情報はControllerからもらいます。
+
+● Controller
+ ModelとViewへ処理の命令を行い、リクエストを受けた結果をレスポンスします。
+ 
+
+● int,float,doulbleの変数の型について教えてください
+int → 整数型
+float → 単精度浮動小数点型（通常約６〜７桁・４バイト）
+double → 単精度浮動小数点型（より有効桁数の大きい数字を入れられます。通常15桁・８バイト）
+
+● application.htmlやapplication.rbのapplicationはなんだと思いますか
+application.html.erbファイル = Railsのレイアウトテンプレートファイル。サイトのレイアウトファイル
+イメージとしては、全ページ共通でこのapplication.html.erbで枠を作って、yieldの部分だけ各個別ページのオリジナルのコンテンツや記事が入ってくるイメージです。
+
+application.rbファイル＝アプリ全体すべての環境で共通の設定ファイル
+タイムゾーンの設定や、デフォルトで使用する言語、アプリ起動時に読み込むディレクトリなどを指定します。
+
+● SQL文で参照、追加、削除は出来ますか
+
+
+● アプリケーション内で検索→結果までの白い画面表示時間が長いです。どう対処しますか
