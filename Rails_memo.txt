@@ -264,89 +264,87 @@
 
 
 
-非同期通信化 ☆☆
+## 非同期通信化 ☆☆
 
- ① 非同期通信化したい箇所を部分テンプレートで抜き出す
+  ① 非同期通信化したい箇所を部分テンプレートで抜き出す
+ 
+    〈ポイント〉eachメソッド内でのrender処理の場合、ブロック変数を指定する
+      例）<%= render "favorites/favorite", book: book %>
+    〈ポイント〉変更したい箇所に属性（idやclass)を付与する   ※class属性の場合すべての要素に影響する場合があるため、id属性がおすすめ！
+      例）<td id="favorite-buttons-<%= book.id %>"><%= render “○○○○○” %></td>
 
- 〈ポイント〉eachメソッド内でのrender処理の場合、ブロック変数を指定する
-   例）<%= render "favorites/favorite", book: book %>
- 〈ポイント〉変更したい箇所に属性（idやclass)を付与する   ※class属性の場合すべての要素に影響する場合があるため、id属性がおすすめ！
-   例）<td id="favorite-buttons-<%= book.id %>"><%= render “○○○○○” %></td>
+  ② 非同期通信設定 ＝Ajaxの処理を適用させる
 
- ② 非同期通信設定 ＝Ajaxの処理を適用させる
+    〈ポイント〉form_with内 に、local: false を追記する → JavaScript形式でリクエストを送る
+    〈ポイント〉link_to内に、remote: true を追記する → JavaScript形式でリクエストを送る
 
- 〈ポイント〉form_with内 に、local: false を追記する → JavaScript形式でリクエストを送る
- 〈ポイント〉link_to内に、remote: true を追記する → JavaScript形式でリクエストを送る
+  ③ コントローラーファイルの編集
+    ・create/destroyアクションのリダイレクト先を削除 or 特定のjsファイルを指定
 
- ③ コントローラーファイルの編集
-  ・create/destroyアクションのリダイレクト先を削除 or 特定のjsファイルを指定
+  ④ jsファイルを作成&定義
+    ・指定したセレクタのみHTMLをrenderして部分的に更新する
+      例）$(セレクタ).html("<%= j(○○○○○) %>”); ※○○○○○には部分テンプレートファイルを呼び出す記述を記載
 
- ④ jsファイルを作成&定義
-  ・指定したセレクタのみHTMLをrenderして部分的に更新する
+      〈ポイント〉ページ内にコメントフォームが適用されている場合は、$("textarea").val(''); でフォームの値を空にできる
+      〈ポイント〉インスタンス変数を設定 ← controllerのcreate/destroyアクションで定義されたインスタンス変数が渡される
+        例）  $(".favorite-btn").html("<%= j(render 'favorites/favorite-btn', book: @book) %>");
 
-   例）$(セレクタ).html("<%= j(○○○○○) %>”); ※○○○○○には部分テンプレートファイルを呼び出す記述を記載
-
- 〈ポイント〉ページ内にコメントフォームが適用されている場合は、$("textarea").val(''); でフォームの値を空にできる
- 〈ポイント〉インスタンス変数を設定 ← controllerのcreate/destroyアクションで定義されたインスタンス変数が渡される
-         例）  $(".favorite-btn").html("<%= j(render 'favorites/favorite-btn', book: @book) %>");
-
- ⑤ コントローラーファイルのインスタンス変数を定義
-  ・jsファイルに渡すためのインスタンス変数を修正、設定
-
+  ⑤ コントローラーファイルのインスタンス変数を定義
+    ・jsファイルに渡すためのインスタンス変数を修正、設定
 
 
-ゲストログイン機能実装  ☆☆☆
+## ゲストログイン機能実装  ☆☆☆
 
- ① sessionsコントローラーファイル（ゲストログイン用）の作成、編集
-  ※ログイン機能はsessions_controller.rbに記述されているが、これはGemでインストールされているため、目に見えないファイル
-   そのため、ゲストログイン用にDeviseのsessions_controller.rbの機能を継承して実装しなければならない
+  ① sessionsコントローラーファイル（ゲストログイン用）の作成、編集
+    ※ログイン機能はsessions_controller.rbに記述されているが、これはGemでインストールされているため、目に見えないファイル
+     そのため、ゲストログイン用にDeviseのsessions_controller.rbの機能を継承して実装しなければならない
 
-  ・app/controllersの配下にusersフォルダ → sessions_controller.rbを作成、以下を記載する
+    ・app/controllersの配下にusersフォルダ → sessions_controller.rbを作成、以下を記載する
 
-     class Users::SessionsController < Devise::SessionsController
-       def guest_sign_in
-         user = User.guest ← 後ほどメソッドを定義
-         sign_in user
-         redirect_to ○○○_path(user.id)
-       end
-     end
+      class Users::SessionsController < Devise::SessionsController
+        def guest_sign_in
+          user = User.guest ← 後ほどメソッドを定義
+          sign_in user
+          redirect_to ○○○_path(user.id)
+        end
+      end
 
- ② routesファイルにルーティングを定義
+  ② routesファイルにルーティングを定義
 
- 〈ポイント〉httpメソッドは”post”
- 〈ポイント〉devise_scope:user を使いネストさせる
+    〈ポイント〉httpメソッドは”post”
+    〈ポイント〉devise_scope:user を使いネストさせる
 
- ③ Userモデルにguestメソッドを定義
+  ③ Userモデルにguestメソッドを定義
 
-  def self.guest
-       find_or_create_by!(name: 'guestuser' ,email: 'guest@example.com') do |user|
-         user.password = SecureRandom.urlsafe_base64
-         user.name = "guestuser"
-       end
-     end
+    def self.guest
+      find_or_create_by!(name: 'guestuser' ,email: 'guest@example.com') do |user|
+        user.password = SecureRandom.urlsafe_base64
+        user.name = "guestuser"
+      end
+    end
 
- 〈ポイント〉find_or_create_by(条件)は、(条件)としたデータが存在するかを判断した上で「trueの場合→そのデータを返す」「falseの場合→新規作成」の処理をする
- 〈ポイント〉find_or_create_by!の「!」を付与すること
- 〈ポイント〉SecureRandom.urlsafe_base64は、ランダムな文字列を生成する
+    〈ポイント〉find_or_create_by(条件)は、(条件)としたデータが存在するかを判断した上で「trueの場合→そのデータを返す」「falseの場合→新規作成」の処理をする
+    〈ポイント〉find_or_create_by!の「!」を付与すること
+    〈ポイント〉SecureRandom.urlsafe_base64は、ランダムな文字列を生成する
 
- ④ ゲストログインボタン（リンク）を配置する
+  ④ ゲストログインボタン（リンク）を配置する
 
-  例）<%= link_to 'ゲストログイン', users_guest_sign_in_path, method: :post %>
+    例）<%= link_to 'ゲストログイン', users_guest_sign_in_path, method: :post %>
 
- ※ プロフィール編集を行えないように設定する
-  ・プロフィール編集画面のボタンを表示しない処理
-   例）<% if user.name != "guestuser" %>
+    ※ プロフィール編集を行えないように設定する
+     ・プロフィール編集画面のボタンを表示しない処理
+        例）<% if user.name != "guestuser" %>
 
-  ・URLに直接入力して編集画面へ遷移ができない処理
-   例）before_action :ensure_guest_user, only: [:edit]
-     def ensure_guest_user
-       @user = User.find(params[:id])
-       if @user.name == "guestuser"
-         redirect_to ○○○_path(current_user.id)
-       end
-     end
+     ・URLに直接入力して編集画面へ遷移ができない処理
+        例）before_action :ensure_guest_user, only: [:edit]
+            def ensure_guest_user
+              @user = User.find(params[:id])
+              if @user.name == "guestuser"
+                redirect_to ○○○_path(current_user.id)
+              end
+            end
 
-グループ機能実装 ☆☆☆
+## グループ機能実装 ☆☆☆
 
  ① Groupモデル・GroupUserモデル（中間テーブル）を作成
 
@@ -404,7 +402,7 @@
    例）@group.users << current.user
 
 
-メール送信機能実装 ☆☆
+## メール送信機能実装 ☆☆
 
  ① Action Mailerを導入する
   ・ rails generate mailer ContactMailer（任意の名称）を実行
@@ -487,7 +485,7 @@
      ⇒ dotenvを導入して環境変数を設定する！
 
 
-Rubocopの実装&解析 ☆
+## Rubocopの実装&解析 ☆
 
  Rubucopとは‥‥コーディング規約に遵守されているかチェックを行う、コード解析ツール
 
@@ -523,7 +521,7 @@ Rubocopの実装&解析 ☆
 
 
 
-バッチ処理 ☆
+## バッチ処理 ☆
 
  「バッチ」とは‥‥“一定量の(あるいは一定期間の)データを集め、プログラムによる一括処理するための処理方法”
 
@@ -566,7 +564,7 @@ Rubocopの実装&解析 ☆
 
 
 
-doting-rails（ドットエンブ） ☆☆
+## doting-rails（ドットエンブ） ☆☆
 
  「dotenv」とは‥‥環境変数を管理する事が出来るgem → 環境変数として指定した変数はGithubなどにアップロードされない
 
@@ -589,15 +587,15 @@ doting-rails（ドットエンブ） ☆☆
   〈ポイント〉Gitの管理下に置きたくないファイルやフォルダは.gitignoreファイルに記載
     例）.gitignoreファイルの最終行に/.envと入力して保存
 
-ページネーションの追加 ★
+## ページネーションの追加 ★
  ※参考サイト：https://qiita.com/japwork/items/33c02de511b7db212e55
 
 
-created_atを日本時間で表示する ★
+## created_atを日本時間で表示する ★
  ※参考サイト：https://qiita.com/tomo_k09/items/e4f19947d35890500492
 
 
-プルダウンメニュー作成 ★
+## プルダウンメニュー作成 ★
  ※参考サイト：https://zenn.dev/yusuke_docha/articles/89b49fd29c16c6
 
 
@@ -672,8 +670,4 @@ end
  ロジックの切り出し(処理が複雑になったり、1つのメソッドの行数が長くなった場合は別のメソッドに切り出すことが重要です。)
  コメントで書くべきものは書く
  コミットの粒度は細く
-
-
-
-
 
