@@ -520,109 +520,103 @@
     username:~/environment/アプリケーション名 $ bundle exec rubocop -a {解析対象フォルダ}
 
 
-
 ## バッチ処理 ☆
 
- 「バッチ」とは‥‥“一定量の(あるいは一定期間の)データを集め、プログラムによる一括処理するための処理方法”
+  「バッチ」とは・・・“一定量の(あるいは一定期間の)データを集め、プログラムによる一括処理するための処理方法”
 
- バッチ処理の実装方法（投稿したデータを2分おきに全て削除するバッチ処理を実装する場合）
+  バッチ処理の実装方法（投稿したデータを2分おきに全て削除するバッチ処理を実装する場合）
 
-  ⑴ 削除プログラムを作成
-   ⅰ.  app/libの配下にbatchフォルダを作成。 ※app/libではない？
-   ⅱ. batchフォルダの中にdata_reset.rbファイルを作成&以下を記述して保存。
+    ⑴ 削除プログラムを作成
+      ⅰ. app/libの配下にbatchフォルダを作成。 ※app/libではない？
+      ⅱ. batchフォルダの中にdata_reset.rbファイルを作成&以下を記述して保存。
 
-    class Batch::DataReset
-      def self.data_reset
-        Book.delete_all
-        p "投稿を全て削除しました"
+      class Batch::DataReset
+        def self.data_reset
+          Book.delete_all
+          p "投稿を全て削除しました"
+        end
       end
-    end
 
-   ⅲ. config/application.rbに以下を追記 ← 作成したapp/lib/batch/data_reset.rbが読み込まれる。
+      ⅲ. config/application.rbに以下を追記 ← 作成したapp/lib/batch/data_reset.rbが読み込まれる。
 
-    class Application < Rails::Application
-      :
-      config.paths.add 'lib', eager_load: true ← 基本この行だけ追記！
-    end
+      class Application < Rails::Application
+        :
+        config.paths.add 'lib', eager_load: true ← 基本この行だけ追記！
+      end
 
-  ⑵ cron（クーロン）を使用しての自動化設定
+    ⑵ cron（クーロン）を使用しての自動化設定
 
-   「cron（クーロン）」とは‥‥定期的に指定のプログラムを実行するためのスケジューラー
+      「cron（クーロン）」とは‥‥定期的に指定のプログラムを実行するためのスケジューラー
 
-   ⅰ. cronの状態確認
-      sudo systemctl status crondを実行  → Active: active (running)…の表記があれば、cronは常駐プログラムとして起動している。
+      ⅰ. cronの状態確認
+       sudo systemctl status crondを実行  → Active: active (running)…の表記があれば、cronは常駐プログラムとして起動している。
 
-   ⅱ. crontab※ に実行内容を登録 ※crontabはcronに実行してもらう設定を編集するための管理コマンド
+      ⅱ. crontab※ に実行内容を登録 ※crontabはcronに実行してもらう設定を編集するための管理コマンド
        crontab -e を実行 → 登録 → 保存
-     ※登録内容は様々なため、ここでは割愛
+        ※登録内容は様々なため、ここでは割愛
 
-   ⅲ. cronを起動
+      ⅲ. cronを起動
        sudo systemctl restart crond を実行
-
-    ※確認が終わったら、必ずcronを停止する
-     sudo systemctl stop crond を実行
-
+        ※確認が終わったら、必ずcronを停止する
+       sudo systemctl stop crond を実行
 
 
 ## doting-rails（ドットエンブ） ☆☆
 
- 「dotenv」とは‥‥環境変数を管理する事が出来るgem → 環境変数として指定した変数はGithubなどにアップロードされない
+  「dotenv」とは‥‥環境変数を管理する事が出来るgem → 環境変数として指定した変数はGithubなどにアップロードされない
 
 
- ① dotenvをインストールする
+  ① dotenvをインストールする
    「Gemfile」の最終行に gem ”doting-rails” を追記 → bundle install を実行
 
- ② アプリケーション直下に、.envファイルを作成
+  ② アプリケーション直下に、.envファイルを作成
 
- ③ .envファイルに環境変数の記述
-  〈ポイント〉SECRET_KEY=○○○  の形で記述
-  〈ポイント〉環境変数設定後の確認方法
+  ③ .envファイルに環境変数の記述
+   〈ポイント〉SECRET_KEY=○○○  の形で記述
+   〈ポイント〉環境変数設定後の確認方法
     ⑴ rails cを実行
     ⑵ ENV['SECRET_KEY’]を実行
 
- ④ 使用方法 ＝ ソースコード内で環境変数を使用する
-  〈ポイント〉ファイルには env[’SECRET_KEY’]  の形で記述！
+  ④ 使用方法 ＝ ソースコード内で環境変数を使用する
+   〈ポイント〉ファイルには env[’SECRET_KEY’]  の形で記述！
 
- ⑤ .gitignoreに.envを追加する
-  〈ポイント〉Gitの管理下に置きたくないファイルやフォルダは.gitignoreファイルに記載
+  ⑤ .gitignoreに.envを追加する
+   〈ポイント〉Gitの管理下に置きたくないファイルやフォルダは.gitignoreファイルに記載
     例）.gitignoreファイルの最終行に/.envと入力して保存
 
 ## ページネーションの追加 ★
  ※参考サイト：https://qiita.com/japwork/items/33c02de511b7db212e55
 
-
 ## created_atを日本時間で表示する ★
  ※参考サイト：https://qiita.com/tomo_k09/items/e4f19947d35890500492
-
 
 ## プルダウンメニュー作成 ★
  ※参考サイト：https://zenn.dev/yusuke_docha/articles/89b49fd29c16c6
 
 
- Ruby on RailsにおけるMVCの役割
-● Model
- Controllerの命令を受け、データに関する処理を行い、結果をControllerへ返却します。
- 処理はデータベースとのやり取り、データ加工、データチェック等です。
+● Ruby on RailsにおけるMVCの役割
+  ・Model
+   Controllerの命令を受け、データに関する処理を行い、結果をControllerへ返却します。
+   処理はデータベースとのやり取り、データ加工、データチェック等です。
 
-● View
- Controllerの命令を受け、ブラウザに表示するHTMLを生成し、Controllerへ返却します。
- 表示に必要な情報はControllerからもらいます。
+  ・View
+   Controllerの命令を受け、ブラウザに表示するHTMLを生成し、Controllerへ返却します。
+   表示に必要な情報はControllerからもらいます。
 
-● Controller
- ModelとViewへ処理の命令を行い、リクエストを受けた結果をレスポンスします。
-
+  ・Controller
+   ModelとViewへ処理の命令を行い、リクエストを受けた結果をレスポンスします。
 
 ● int,float,doulbleの変数の型について教えてください
-int → 整数型
-float → 単精度浮動小数点型（通常約６〜７桁・４バイト）
-double → 単精度浮動小数点型（より有効桁数の大きい数字を入れられます。通常15桁・８バイト）
+  ・int → 整数型
+  ・float → 単精度浮動小数点型（通常約６〜７桁・４バイト）
+  ・double → 単精度浮動小数点型（より有効桁数の大きい数字を入れられます。通常15桁・８バイト）
 
 ● application.htmlやapplication.rbのapplicationはなんだと思いますか
-application.html.erbファイル = Railsのレイアウトテンプレートファイル。サイトのレイアウトファイル
-イメージとしては、全ページ共通でこのapplication.html.erbで枠を作って、yieldの部分だけ各個別ページのオリジナルのコンテンツや記事が入ってくるイメージです。
+  ・application.html.erbファイル = Railsのレイアウトテンプレートファイル。サイトのレイアウトファイル
+   イメージとしては、全ページ共通でこのapplication.html.erbで枠を作って、yieldの部分だけ各個別ページのオリジナルのコンテンツや記事が入ってくるイメージです。
 
-application.rbファイル＝アプリ全体すべての環境で共通の設定ファイル
-タイムゾーンの設定や、デフォルトで使用する言語、アプリ起動時に読み込むディレクトリなどを指定します。
+  ・application.rbファイル＝アプリ全体すべての環境で共通の設定ファイル
+   タイムゾーンの設定や、デフォルトで使用する言語、アプリ起動時に読み込むディレクトリなどを指定します。
 
 ☆ SQL文で参照、追加、削除は出来ますか
 参照：SELECT 列名1, 列名2, .... FROM <テーブル名>;
