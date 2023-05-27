@@ -9,7 +9,7 @@ SELECTの基本的な構文
 
 データを追加するINSERT文
 
-  INSERT FROM テーブル名
+  INSERT INTO テーブル名
   VALUES (値1,値2,……);
 
 データを更新するUPDATE文
